@@ -13,6 +13,32 @@ fn bitsliceops() {
     assert_eq!(num_bits,1+1+2+1);
 }
 #[test]
+fn biter() {
+    use slice_bit_operations::SliceBitOps;
+    let array:[u8;4]=[1,2,3,4];
+    let mut count:usize=0;
+    array.biter(0..).for_each(|bit| count+=1);
+    assert_eq!(count,4*8);
+    count=0;
+    array.biter(0..=1).for_each(|bit| count+=1);
+    assert_eq!(count,2);
+}
+
+#[test]
+fn biter_mut() {
+    use slice_bit_operations::{MutSliceBitOps,SliceBitOps};
+    let mut array:[u8;4]=[1,2,3,4];
+    let mut count:usize=0;
+    array.biter_mut(0..).for_each(|_bit| count+=1);
+    assert_eq!(count,4*8);
+    count=0;
+    array.biter_mut(0..=1).for_each(|_bit| count+=1);
+    assert_eq!(count,2);
+    array.biter_mut(0..).for_each(|mut bit| *bit = true);
+    assert_eq!(array.iter().map(|&x| x as usize).sum::<usize>(),4*u8::MAX as usize);
+}
+
+#[test]
 fn mutbitsliceops() {
     use slice_bit_operations::{MutSliceBitOps,SliceBitOps};
     let mut array:[u8;4]=[1,2,3,4];
