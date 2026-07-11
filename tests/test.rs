@@ -12,7 +12,7 @@ fn bitsliceops() {
     array.bit_iter().for_each(|bit| num_bits+=bit as usize);
     assert_eq!(num_bits,1+1+2+1);
 }
-
+#[test]
 fn mutbitsliceops() {
     use slice_bit_operations::{MutSliceBitOps,SliceBitOps};
     let mut array:[u8;4]=[1,2,3,4];
