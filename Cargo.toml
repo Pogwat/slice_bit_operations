@@ -9,5 +9,5 @@ readme = "README.md"
 repository = "https://github.com/Pogwat/slice_bit_operations"
 
 [dependencies]
-bit_operations = "0.1.6"
-biter = "0.1.1"
+bit_operations = "0.3.0"
+biter = "0.1.3"
