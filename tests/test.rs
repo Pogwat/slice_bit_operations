@@ -119,7 +119,7 @@ fn first_one_zero() {
 
 #[test]
 fn last_one_zero() {
-    use slice_bit_operations::{SliceBitOps,BitOps};
+    use slice_bit_operations::SliceBitOps;
     let array:[u8;4] = [0,1,2,3];
     assert_eq!(array.last_zero(0..), Some(7+8*3));
     assert_eq!(array.last_zero(4..=5), Some(5));

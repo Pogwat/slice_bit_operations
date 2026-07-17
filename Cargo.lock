@@ -28,7 +28,7 @@ checksum = "353e7e05ffb00e27bc0eead9f38c0dd9baab087fbe98a8bc4487b5a33a2e0a72"
 
 [[package]]
 name = "slice_bit_operations"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bit_operations",
  "biter",

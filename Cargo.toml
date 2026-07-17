@@ -1,6 +1,6 @@
 [package]
 name = "slice_bit_operations"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 keywords = ["no_std", "bit", "slice"]
 description = "Bit Manipulation of a slice"
