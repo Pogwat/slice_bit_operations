@@ -10,21 +10,20 @@ macro_rules! counters {
             let (start_bit,end_bit) = self.range_extract(range); //start end bits
             let (start_idx,start_bit):(usize,u8) = (Self::bits_idx(start_bit), Self::bits_bit(start_bit));
             let (end_idx,end_bit):(usize,u8) = (Self::bits_idx(end_bit), Self::bits_bit(end_bit));
-            let mut acc:usize=0;
-            if start_idx==end_idx {
-                acc+= unsafe {self.as_ref().get_unchecked(end_idx).$bit_method(&(start_bit..=end_bit)) as usize};
-            } else {
-                acc+= unsafe {self.as_ref().get_unchecked(start_idx).$bit_method(&(start_bit..)) as usize};
-                acc+= unsafe {self.as_ref().get_unchecked(end_idx).$bit_method(&(..=end_bit)) as usize};
-                self.as_ref()[start_idx..end_idx].iter().skip(1).for_each(|num| acc+=num.$word_method() as usize );
-            }
-            acc
+            if start_idx==end_idx { unsafe {
+                self.as_ref().get_unchecked(end_idx).$bit_method(&(start_bit..=end_bit)) as usize
+            } } else { unsafe {
+                self.as_ref().get_unchecked(start_idx).$bit_method(&(start_bit..)) as usize +
+                self.as_ref().get_unchecked(end_idx).$bit_method(&(..=end_bit)) as usize +
+                self.as_ref()[start_idx..end_idx].iter().skip(1).map(|num| num.$word_method() as usize).sum::<usize>()
+            } }
         }
-    };
+    }
 }
 
 macro_rules! firstlast {
-    ($fn_name:ident, $fn_calculator:ident) => {
+    ($(#[$meta:meta])* $fn_name:ident, $fn_calculator:ident) => {
+        $(#[$meta])*
         fn $fn_name<R:NumRangeExtract<usize>+SliceIndex<[ElementType], Output = [ElementType]> >(&self, range:R) -> Option<usize> {
             let (start_bit,end_bit) = self.range_extract(range);
             let (starts_idx,starts_bit):(usize,u8) = (Self::bits_idx(start_bit), Self::bits_bit(start_bit));
@@ -40,7 +39,6 @@ macro_rules! firstlast {
                 )
             }
         }
-
     }
 }
 use core::iter;
@@ -72,59 +70,28 @@ pub trait SliceBitOps<ElementType:BitOps+>:AsRef<[ElementType]> {
     fn first_zero_idx<R:SliceIndex<[ElementType], Output = [ElementType]> >(&self,idx_range:R) -> Option<usize>{
         self.as_ref()[idx_range].iter().position(|num| *num!=!ElementType::ZERO)
     }
-    // fn first_one<R:NumRangeExtract<usize>+SliceIndex<[ElementType], Output = [ElementType]> >(&self, range:R) -> Option<usize> {
-    //     let (start_bit,end_bit) = self.range_extract(range);
-    //     let (starts_idx,starts_bit):(usize,u8) = (Self::bits_idx(start_bit), Self::bits_bit(start_bit));
-    //     let (ends_idx,ends_bit):(usize,u8) = (Self::bits_idx(end_bit), Self::bits_bit(end_bit));
-    //     if starts_idx == ends_idx {
-    //         self.as_ref()[starts_idx].first_one(&(starts_bit..=ends_bit)).map(|bit| bit as usize + start_bit - starts_bit as usize)
-    //     } else {
-    //         self.as_ref()[starts_idx].first_one(&(starts_bit..)).map(|bitpos| bitpos as usize + start_bit - starts_bit as usize)
-    //             .or_else(||
-    //         self.as_ref()[starts_idx..ends_idx].iter().enumerate().skip(1).find_map(|(idx,num)| num.first_one(&(0..)).map(|fz| fz as usize+start_bit+(idx+1)*ElementType::BITS as usize))
-    //             ).or_else(||
-    //         self.as_ref()[ends_idx].first_one(&(..=ends_bit)).map(|bitpos| bitpos as usize + end_bit - ends_bit as usize)
-    //         )
-    //     }
-    // }
 
-    // fn first_zero<R:NumRangeExtract<usize>+SliceIndex<[ElementType], Output = [ElementType]> >(&self, range:R) -> Option<usize> {
-    //     let (start_bit,end_bit) = self.range_extract(range);
-    //     let (starts_idx,starts_bit):(usize,u8) = (Self::bits_idx(start_bit), Self::bits_bit(start_bit));
-    //     let (ends_idx,ends_bit):(usize,u8) = (Self::bits_idx(end_bit), Self::bits_bit(end_bit));
-    //     if starts_idx == ends_idx {
-    //         self.as_ref()[starts_idx].first_zero(&(starts_bit..=ends_bit)).map(|bit| bit as usize + start_bit - starts_bit as usize)
-    //     } else {
-    //         self.as_ref()[starts_idx].first_zero(&(starts_bit..)).map(|bitpos| bitpos as usize + start_bit - starts_bit as usize)
-    //             .or_else(||
-    //         self.as_ref()[starts_idx..ends_idx].iter().enumerate().skip(1).find_map(|(idx,num)| num.first_zero(&(0..)).map(|fz| fz as usize+start_bit+(idx+1)*ElementType::BITS as usize))
-    //             ).or_else(||
-    //         self.as_ref()[ends_idx].first_zero(&(..=ends_bit)).map(|bitpos| bitpos as usize + end_bit - ends_bit as usize)
-    //         )
-    //     }
-    // }
     counters!(
-        ///Count zeros form bit range
+        /// Count zeros form bit range
         ctz,ctz,count_zeros);
     counters!(
-        ///Count ones form bit range
+        /// Count ones form bit range
         popcnt,popcnt,count_ones);
 
-    // first_bit!(
-    //     ///Find first ones bit index from bit range
-    //     first_one, trailing_zeros, ElementType::ZERO);
-    // first_bit!(
-    //     ///Find first zeros bit index from bit range
-    //     first_zero, trailing_ones, ElementType::MAX);
-
-    firstlast!(first_zero,first_zero);
-    firstlast!(first_one,first_one);
-
+    firstlast!(
+        /// find first zero from bit range
+        first_zero,first_zero);
+    firstlast!(
+        /// find first one from bit range
+        first_one,first_one);
+    firstlast!(
+        /// find last one from bit range
+        last_one,last_one);
+    firstlast!(
+        /// find last zero from bit range
+        last_zero,last_zero);
 
 }
-
-
-
 
 /// Methods for Mutable BitSlice
 pub trait MutSliceBitOps<ElementType:BitOps>:SliceBitOps<ElementType>+AsMut<[ElementType]> {
