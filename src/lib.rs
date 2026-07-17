@@ -16,7 +16,7 @@ macro_rules! counters {
             } } else { unsafe {
                 self.as_ref().get_unchecked(start_idx).$bit_method(&(start_bit..)) as usize +
                 self.as_ref().get_unchecked(end_idx).$bit_method(&(..=end_bit)) as usize +
-                self.as_ref()[start_idx..end_idx].iter().skip(1).map(|num| num.$bit_method(&(0..)) as usize).sum::<usize>()
+                self.as_ref().get_unchecked(start_idx..end_idx).iter().skip(1).map(|num| num.$bit_method(&(0..)) as usize).sum::<usize>()
             } }
         }
     }
