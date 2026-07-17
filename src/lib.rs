@@ -79,7 +79,6 @@ pub trait SliceBitOps<ElementType:BitOps+>:AsRef<[ElementType]> {
         let (ends_idx,ends_bit):(usize,u8) = (Self::bits_idx(end_bit), Self::bits_bit(end_bit));
         BitRanger { start_bit,end_bit,starts_idx,ends_idx,starts_bit,ends_bit }
     }
-
     #[inline]
     fn biter<'short, R:NumRangeExtract<usize> >(&'short self, range:R) -> Biter<'short,ElementType> {
         let (start,end) = self.range_extract(range); //start end bits
@@ -96,14 +95,12 @@ pub trait SliceBitOps<ElementType:BitOps+>:AsRef<[ElementType]> {
     fn first_zero_idx<R:SliceIndex<[ElementType], Output = [ElementType]> >(&self,idx_range:R) -> Option<usize>{
         self.as_ref()[idx_range].iter().position(|num| *num!=!ElementType::ZERO)
     }
-
     counters!(
         /// Count zeros from bit range
         ctz,ctz);
     counters!(
         /// Count ones from bit range
         popcnt,popcnt);
-
     firstlastrev!(
         /// find first zero from bit range
         first_zero,first_zero,false);
@@ -116,7 +113,6 @@ pub trait SliceBitOps<ElementType:BitOps+>:AsRef<[ElementType]> {
     firstlastrev!(
         /// find first one from bit range
         last_one,last_one,true);
-
 }
 
 /// Methods for Mutable BitSlice

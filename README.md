@@ -34,6 +34,10 @@ Iterate over bits in a Bitslice
     let mut set_bits:usize =0;
     array.bit_iter().for_each(|bit| set_bits+=bit as usize);
     assert_eq!(set_bits,1+1+2+1);
+    //iterate over a bit range
+    set_bits=0;
+    array.biter(5..=10).for_each(|bit| set_bits+=bit as usize);
+    assert_eq!(set_bits,1);
 
     
     let mut array = array;
@@ -42,6 +46,30 @@ Iterate over bits in a Bitslice
     array.bit_iter().for_each(|bit| set_bits+=bit as usize);
     assert_eq!(set_bits,4*8);
     assert_eq!(array.bit_len(),4*8); //Number of bits in BitSlice, Impl for Mutable and Immutable BitSlices
+    //mutably iterate over a bit range
+    array.biter_mut(0..=5).for_each(|mut bit| *bit = false);
+    assert_eq!(array[0], 0b11000000)
+    
+```
+
+number of set or unset bits in a slice
+```rust
+    use slice_bit_operations::SliceBitOps;
+    let array: [u8;3] = [1,2,3];
+    assert_eq!(array.popcnt(0..), 1+1+2);
+    assert_eq!(array.ctz(0..), 3*8-1-1-2);
+    assert_eq!(array.popcnt(3..=10), 1);
+    assert_eq!(array.ctz(3..=10), 7);
+```
+
+first or last set or unset bit 
+```rust 
+    use slice_bit_operations::SliceBitOps;
+    let array: [u8;3] = [1,2,3];
+    assert_eq!(array.first_one(0..), Some(0));
+    assert_eq!(array.first_zero(0..), Some(1));
+    assert_eq!(array.last_one(0..), Some(2*8+1));
+    assert_eq!(array.last_zero(0..), Some(3*8-1));
 ```
 
 for full docs use docs.rs : [docs](https://docs.rs/slice_bit_operations/latest/)
