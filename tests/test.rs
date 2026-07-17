@@ -83,9 +83,9 @@ fn mutbitsliceops() {
 }
 
 #[test]
-fn frist_one_zero() {
+fn first_one_zero() {
     use slice_bit_operations::{SliceBitOps,BitOps};
-    let array:[u8;2] = [0,1];
+    let array:[u8;3] = [0,1,2];
     assert_eq!(array.first_one(0..=7),None);
     assert_eq!(array[0..1].first_one(0..),None);
     assert_eq!(array.first_one(0..),Some(7+1));
@@ -115,4 +115,49 @@ fn frist_one_zero() {
     println!("{:?}",op);
     assert_eq!(oarray.first_one(7..8),None);
     assert_eq!(oarray.first_zero(0..=0),None);
+}
+
+#[test]
+fn last_one_zero() {
+    use slice_bit_operations::{SliceBitOps,BitOps};
+    let array:[u8;4] = [0,1,2,3];
+    assert_eq!(array.last_zero(0..), Some(7+8*3));
+    assert_eq!(array.last_zero(4..=5), Some(5));
+    assert_eq!(array.last_zero(4..=5), Some(5));
+    assert_eq!(array.last_zero(4..=5), Some(5));
+
+    assert_eq!(array.bit_get(7+8*2-1), false);
+    assert_eq!(array.bit_get(7+8*2), false);
+    assert_eq!(array.bit_get(7+8*2+1), true);
+    assert_eq!(array.bit_get(7+8*2+2), true);
+    assert_eq!(array.bit_get(7+8*2+3), false);
+
+    assert_eq!(array.last_zero(7+8*2..=7+8*2), Some(7+8*2));
+    assert_eq!(array.last_zero(7+8*2..=7+8*2+2), Some(7+8*2));
+    assert_eq!(array.last_zero(7+8*2..=7+8*2+3), Some(7+8*2+3));
+
+    assert_eq!(array.last_one(7+8*2-1..=7+8*2), None);
+    assert_eq!(array.last_one(7+8*2-1..=7+8*2+1), Some(7+8*2+1));
+    assert_eq!(array.last_one(7+8*2-1..=7+8*2+2), Some(7+8*2+2));
+    assert_eq!(array.last_one(7+8*2-1..=7+8*2+3), Some(7+8*2+2));
+
+    //0-7   8-15   16-23    24-31    32-39
+    let farry: [u8;5] = [!0,0,!0,!0,0];
+
+    assert_eq!(farry.last_zero(0..),Some(39));
+    assert_eq!(farry.bit_get(16),true);
+    assert_eq!(farry.bit_get(15),false);
+    assert_eq!(farry.last_zero(0..=23),Some(15));
+    assert_eq!(farry.last_zero(0..=7),None);
+    assert_eq!(farry.last_zero(16..=31),None);
+    assert_eq!(farry.last_zero(16..=32),Some(32));
+
+    assert_eq!(farry.last_one(16..=31),Some(31));
+    assert_eq!(farry.last_one(0..),Some(31));
+
+    //0-7   8-15   16-23    24-31    32-39   40-47   48-55
+    let oarray: [u8;7] = [0,0,!0,!0,0,0,!0];
+    assert_eq!(oarray.last_one(0..),Some(55));
+    assert_eq!(oarray.last_one(0..=15),None);
+    assert_eq!(oarray.last_one(21..=41),Some(31));
 }
