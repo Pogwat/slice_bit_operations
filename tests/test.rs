@@ -84,10 +84,35 @@ fn mutbitsliceops() {
 
 #[test]
 fn frist_one_zero() {
-    use slice_bit_operations::SliceBitOps;
+    use slice_bit_operations::{SliceBitOps,BitOps};
     let array:[u8;2] = [0,1];
     assert_eq!(array.first_one(0..=7),None);
     assert_eq!(array[0..1].first_one(0..),None);
     assert_eq!(array.first_one(0..),Some(7+1));
     assert_eq!(array.first_one(7..=8),Some(8));
+    assert_eq!(array.first_one(7..8),None);
+    assert_eq!(array.first_zero(0..), Some(0));
+    assert_eq!(array.first_zero(8..), Some(9));
+    assert_eq!(array.first_zero(8..9), None);
+    let zarray:[u8;2] = [0b00000010,0b10000001];
+    assert_eq!(zarray.first_one(8..9),Some(8));
+    assert_eq!(zarray.first_one(7..8),None);
+    assert_eq!(zarray[1].first_zero(&(2..3)), Some(2));
+    assert_eq!(zarray.first_zero(10..11),Some(10));
+    let oarray: [u8;1] = [1];
+    let (start_bit,end_bit) = (0,0);
+
+    let (starts_idx,starts_bit):(usize,u8) = (<[u8;1]>::bits_idx(start_bit),<[u8;1]>::bits_bit(start_bit) );
+    let (ends_idx,ends_bit):(usize,u8) = (<[u8;1]>::bits_idx(end_bit), <[u8;1]>::bits_bit(end_bit));
+    assert_eq!(starts_idx,0);
+    assert_eq!(ends_idx,0);
+    assert_eq!(starts_bit,0);
+    assert_eq!(ends_bit,0);
+    assert_eq!(u8::bitmask(&(starts_bit..=ends_bit)), 0b00000001);
+    let truncated = oarray[0] & u8::bitmask(&(starts_bit..=ends_bit));
+    assert_eq!(truncated,1);
+    let op = (truncated!=u8::MAX).then_some(truncated.trailing_ones() as usize+start_bit -starts_bit as usize);
+    println!("{:?}",op);
+    assert_eq!(oarray.first_one(7..8),None);
+    assert_eq!(oarray.first_zero(0..=0),None);
 }
