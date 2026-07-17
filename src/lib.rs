@@ -3,14 +3,7 @@
 pub use bit_operations::{BitOps,MutBitProxy, NumRangeExtract};
 pub use biter::{Biter,MutBiter};
 
-pub struct BitRanger {
-    start_bit:usize,
-    end_bit:usize,
-    starts_idx:usize,
-    ends_idx:usize,
-    starts_bit:u8,
-    ends_bit:u8
-}
+pub struct BitRanger {start_bit:usize,end_bit:usize,starts_idx:usize,ends_idx:usize,starts_bit:u8,ends_bit:u8}
 
 macro_rules! counters {
     (   $(#[$meta:meta])* $fn_name:ident, $bit_method:ident) => {
@@ -29,50 +22,33 @@ macro_rules! counters {
     }
 }
 
-macro_rules! first {
-    ($(#[$meta:meta])* $fn_name:ident, $fn_calculator:ident) => {
+macro_rules! firstlastrev {
+    ($(#[$meta:meta])* $fn_name:ident, $fn_calculator:ident, $flip:tt) => {
         $(#[$meta])*
         #[inline]
         fn $fn_name<R:bit_operations::NumRangeExtract<usize>+core::slice::SliceIndex<[ElementType], Output = [ElementType]> >(&self, range:R) -> Option<usize> {
             let ranger = self.new_ranger(range);
             if ranger.starts_idx == ranger.ends_idx { unsafe {
                 self.as_ref().get_unchecked(ranger.starts_idx).$fn_calculator(&(ranger.starts_bit..=ranger.ends_bit)).map(|bit| bit as usize + ranger.start_bit - ranger.starts_bit as usize)
-            } } else { unsafe {
-                self.as_ref().get_unchecked(ranger.starts_idx).$fn_calculator(&(ranger.starts_bit..)).map(|bitpos| bitpos as usize + ranger.start_bit - ranger.starts_bit as usize)
-                    .or_else(||
-                self.as_ref().get_unchecked(ranger.starts_idx..ranger.ends_idx).iter().skip(1)
-                .find_map(|num| num.$fn_calculator(&(0..))
-                    .map(|fz| (num as *const ElementType).offset_from(self.as_ref().as_ptr())as usize*ElementType::BITS as usize  +fz as usize )
-                )
-                    ).or_else(||
-                self.as_ref().get_unchecked(ranger.ends_idx).$fn_calculator(&(..=ranger.ends_bit)).map(|bitpos| bitpos as usize + ranger.end_bit - ranger.ends_bit as usize)
-                )
-            } }
+            } } else { unsafe {firstlastrev!(@flip $flip, self, ranger, $fn_calculator) } }
         }
-    }
-}
-
-macro_rules! last {
-    ($(#[$meta:meta])* $fn_name:ident, $fn_calculator:ident) => {
-        $(#[$meta])*
-        #[inline]
-        fn $fn_name<R:bit_operations::NumRangeExtract<usize>+core::slice::SliceIndex<[ElementType], Output = [ElementType]> >(&self, range:R) -> Option<usize> {
-            let ranger = self.new_ranger(range);
-            if ranger.starts_idx == ranger.ends_idx { unsafe {
-                self.as_ref().get_unchecked(ranger.starts_idx).$fn_calculator(&(ranger.starts_bit..=ranger.ends_bit)).map(|bit| bit as usize + ranger.start_bit - ranger.starts_bit as usize)
-            } } else { unsafe {
-                self.as_ref().get_unchecked(ranger.ends_idx).$fn_calculator(&(..=ranger.ends_bit)).map(|bitpos| bitpos as usize + ranger.end_bit - ranger.ends_bit as usize)
-                    .or_else(||
-                        self.as_ref().get_unchecked(ranger.starts_idx..ranger.ends_idx).iter().skip(1).rev()
-                        .find_map(|num| num.$fn_calculator(&(0..))
-                            .map(|fz| (num as *const ElementType).offset_from(self.as_ref().as_ptr())as usize*ElementType::BITS as usize  +fz as usize  )
-                        )
-                    ).or_else(||
-                self.as_ref().get_unchecked(ranger.starts_idx).$fn_calculator(&(ranger.starts_bit..)).map(|bitpos| bitpos as usize + ranger.start_bit - ranger.starts_bit as usize)
-                )
-            } }
-        }
-    }
+    };
+    (@flip true, $self:ident, $ranger:ident, $fn_calculator:ident) => {
+            $self.as_ref().get_unchecked($ranger.ends_idx).$fn_calculator(&(..=$ranger.ends_bit)).map(|bitpos| bitpos as usize + $ranger.end_bit - $ranger.ends_bit as usize)
+                .or_else(||
+                    $self.as_ref().get_unchecked($ranger.starts_idx..$ranger.ends_idx).iter().skip(1).rev()
+                    .find_map(|num| num.$fn_calculator(&(0..)).map(|fz| (num as *const ElementType).offset_from($self.as_ref().as_ptr())as usize*ElementType::BITS as usize  +fz as usize  ))
+                ).or_else(||
+            $self.as_ref().get_unchecked($ranger.starts_idx).$fn_calculator(&($ranger.starts_bit..)).map(|bitpos| bitpos as usize + $ranger.start_bit - $ranger.starts_bit as usize))
+    };
+    (@flip false, $self:ident, $ranger:ident, $fn_calculator:ident) => {
+            $self.as_ref().get_unchecked($ranger.starts_idx).$fn_calculator(&($ranger.starts_bit..)).map(|bitpos| bitpos as usize + $ranger.start_bit - $ranger.starts_bit as usize)
+                .or_else(||
+                    $self.as_ref().get_unchecked($ranger.starts_idx..$ranger.ends_idx).iter().skip(1)
+                    .find_map(|num| num.$fn_calculator(&(0..)).map(|fz| (num as *const ElementType).offset_from($self.as_ref().as_ptr())as usize*ElementType::BITS as usize  +fz as usize ))
+                ).or_else(||
+            $self.as_ref().get_unchecked($ranger.ends_idx).$fn_calculator(&(..=$ranger.ends_bit)).map(|bitpos| bitpos as usize + $ranger.end_bit - $ranger.ends_bit as usize))
+    };
 }
 
 use core::slice::SliceIndex;
@@ -128,18 +104,18 @@ pub trait SliceBitOps<ElementType:BitOps+>:AsRef<[ElementType]> {
         /// Count ones from bit range
         popcnt,popcnt);
 
-    first!(
+    firstlastrev!(
         /// find first zero from bit range
-        first_zero,first_zero);
-    first!(
+        first_zero,first_zero,false);
+    firstlastrev!(
         /// find first one from bit range
-        first_one,first_one);
-    last!(
-        /// find last one from bit range
-        last_one,last_one);
-    last!(
-        /// find last zero from bit range
-        last_zero,last_zero);
+        first_one,first_one,false);
+    firstlastrev!(
+        /// find first zero from bit range
+        last_zero,last_zero,true);
+    firstlastrev!(
+        /// find first one from bit range
+        last_one,last_one,true);
 
 }
 
