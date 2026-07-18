@@ -1,65 +1,53 @@
-use criterion::{criterion_group, criterion_main, Criterion};
 use std::hint::black_box;
-
 use slice_bit_operations::{SliceBitOps,MutSliceBitOps};
-fn criterion_benchmark(c: &mut Criterion) {
-    let data: Vec<i32> = (0..1000).rev().collect();  // Reversed array of 1000 elements
 
-    //last one is about 9000 elements from the end
+fn main() {divan::main();}
+
+#[divan::bench]
+fn last_one() {
     let zend: Vec<u64> = (0..1000).rev().chain(core::iter::repeat(0).take(9000)).collect();
-
-    //4.4153 µs per iter
-    c.bench_function("last_one", |b| {
-        b.iter(|| zend.last_one(0..))
-    });
-
-    //last zero is about 9000 elements from the end
-    let fend: Vec<u64> = (0..1000).rev().chain(core::iter::repeat(!0).take(9000)).collect();
-
-    //6.2775 µs per iter
-    c.bench_function("last_zero", |b| {
-        b.iter(|| fend.last_zero(0..))
-    });
-
-    //first one is about 9k elements from start
-    let zstar: Vec<u64> = core::iter::repeat(0).take(9000).chain((0..1000).rev()).collect();
-
-    //3.2012 µs per iter
-    c.bench_function("first_one", |b| {
-        b.iter(|| zstar.first_one(0..))
-    });
-
-    //first zero is about 9k elements from start
-    let fstar: Vec<u64> = core::iter::repeat(!0).take(9000).chain((0..1000).rev()).collect();
-
-    //3.0670 µs per iter
-    c.bench_function("first_zero", |b| {
-        b.iter(|| fstar.first_zero(0..))
-    });
-
-    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
-    //2.3030 µs per iter
-    c.bench_function("ctz", |b| {
-        b.iter(|| bal.ctz(0..))
-    });
-    //1.9825 µs per iter
-    c.bench_function("popcnt", |b| {
-        b.iter(|| bal.popcnt(0..))
-    });
-
-     //28.833 µs per iter
-    c.bench_function("bit_iter_mut", |b| {
-        b.iter(|| bal.clone().bit_iter_mut().for_each(|mut bit| *bit=false))
-    });
-
-    // 4.8954 µs per iter
-   c.bench_function("bit_iter", |b| {
-       b.iter(|| {
-           let mut set_bits=0;
-           bal.clone().bit_iter().for_each(|bit| {set_bits +=bit as usize;})
-       })
-   });
+    zend.last_one(0..);
 }
 
-criterion_group!(benches, criterion_benchmark);
-criterion_main!(benches);
+#[divan::bench]
+fn last_zero() {
+    let fend: Vec<u64> = (0..1000).rev().chain(core::iter::repeat(!0).take(9000)).collect();
+    fend.last_zero(0..);
+}
+
+#[divan::bench]
+fn first_one() {
+    let zstar: Vec<u64> = core::iter::repeat(0).take(9000).chain((0..1000).rev()).collect();
+    zstar.first_one(0..);
+}
+
+#[divan::bench]
+fn first_zero() {
+    let fstar: Vec<u64> = core::iter::repeat(!0).take(9000).chain((0..1000).rev()).collect();
+    fstar.first_zero(0..);
+}
+
+#[divan::bench]
+fn ctz() {
+    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    bal.ctz(0..);
+}
+
+#[divan::bench]
+fn popcnt() {
+    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    bal.popcnt(0..);
+}
+
+#[divan::bench]
+fn bit_iter() {
+    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    let mut set_bits=0;
+    bal.clone().bit_iter().for_each(|bit| {set_bits +=bit as usize;})
+}
+
+#[divan::bench]
+fn bit_iter_mut() {
+    let mut bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    bal.bit_iter_mut().for_each(|mut bit| *bit=false)
+}
