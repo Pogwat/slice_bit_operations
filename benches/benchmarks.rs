@@ -47,11 +47,18 @@ fn criterion_benchmark(c: &mut Criterion) {
         b.iter(|| bal.popcnt(0..))
     });
 
-     //765.92 µs per iter //28.833 µs
+     //28.833 µs per iter
     c.bench_function("bit_iter_mut", |b| {
         b.iter(|| bal.clone().bit_iter_mut().for_each(|mut bit| *bit=false))
     });
-    ;
+
+    // 4.8954 µs per iter
+   c.bench_function("bit_iter", |b| {
+       b.iter(|| {
+           let mut set_bits=0;
+           bal.clone().bit_iter().for_each(|bit| {set_bits +=bit as usize;})
+       })
+   });
 }
 
 criterion_group!(benches, criterion_benchmark);
