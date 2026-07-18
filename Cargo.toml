@@ -10,4 +10,11 @@ repository = "https://github.com/Pogwat/slice_bit_operations"
 
 [dependencies]
 bit_operations = "0.3.1"
-biter = "0.1.3"
+biter = "0.1.5"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmarks"
+harness = false
