@@ -1,13 +1,14 @@
 [package]
 name = "slice_bit_operations"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 keywords = ["no_std", "bit", "slice"]
 description = "Bit Manipulation of a slice"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Pogwat/slice_bit_operations"
-exclude = ["benches"]
+exclude = ["benches", ".zed"]
+autobenches = false
 
 [dependencies]
 bit_operations = "0.3.1"

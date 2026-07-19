@@ -1,4 +1,3 @@
-
 use slice_bit_operations::{SliceBitOps,MutSliceBitOps};
 use criterion::{criterion_group, criterion_main, Criterion};
 
