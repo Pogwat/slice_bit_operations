@@ -7,6 +7,7 @@ description = "Bit Manipulation of a slice"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Pogwat/slice_bit_operations"
+exclude = ["Cargo.lock"]
 
 [dependencies]
 bit_operations = "0.3.1"
