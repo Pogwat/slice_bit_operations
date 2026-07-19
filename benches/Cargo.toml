@@ -1,0 +1,14 @@
+[package]
+name = "benchmark"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Pogwat/slice_bit_operations"
+
+[dependencies]
+slice_bit_operations = { path = ".." }
+divan = "0.1.21"
+
+[[bench]]
+name = "benchmarks"
+harness = false
+path = "benchmarks.rs"
