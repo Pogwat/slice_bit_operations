@@ -6,7 +6,7 @@ repository = "https://github.com/Pogwat/slice_bit_operations"
 
 [dependencies]
 slice_bit_operations = { path = ".." }
-divan = "0.1.21"
+criterion = "0.8.2"
 
 [[bench]]
 name = "benchmarks"
