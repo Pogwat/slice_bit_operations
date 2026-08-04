@@ -26,28 +26,14 @@ fn last_one(c: &mut Criterion) {
         b.iter(|| zend.bit_iter().last_one() )
     );
 }
-// //2.2123 µs
-// fn ctz(c: &mut Criterion) {
-//     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
-//     c.bench_function("ctz", |b|
-//         b.iter(|| bal.ctz(0..) )
-//     );
-// }
-// //2.0312 µs
-// fn popcnt(c: &mut Criterion) {
-//     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
-//     c.bench_function("popcnt", |b|
-//         b.iter(|| bal.popcnt(0..) )
-//     );
-// }
-//2.2016 µs
+
 fn biter_popcnt(c: &mut Criterion) {
     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
     c.bench_function("biter_popcnt", |b|
         b.iter(|| bal.bit_iter().popcnt() )
     );
 }
-//2.4204 µs
+
 fn biter_ctz(c: &mut Criterion) {
     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
     c.bench_function("biter_ctz", |b|
@@ -92,7 +78,6 @@ fn bit_iter_mut(c: &mut Criterion) {
 
 criterion_group!(firstlast, last_one,last_zero,first_one,first_zero);
 criterion_group!(biterfirst, biter_first_one,biter_first_zero);
-//criterion_group!(counters, ctz,popcnt);
 criterion_group!(bitercounters, biter_ctz,biter_popcnt);
 criterion_group!(biters, bit_iter,bit_iter_mut);
 criterion_main!(firstlast,biters,bitercounters,biterfirst);
