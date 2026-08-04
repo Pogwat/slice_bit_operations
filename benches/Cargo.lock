@@ -57,9 +57,9 @@ dependencies = [
 
 [[package]]
 name = "biter"
-version = "0.1.5"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc98215ad3a606fe1807385b21fea4de605c2e21075c9593a643ded403b7d6f3"
+checksum = "e7a80ebd2307b12d826cbc8316236301ef0daee9a240454898755b447b1a6232"
 dependencies = [
  "bit_operations",
 ]

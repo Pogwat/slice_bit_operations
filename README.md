@@ -56,20 +56,20 @@ number of set or unset bits in a slice
 ```rust
     use slice_bit_operations::SliceBitOps;
     let array: [u8;3] = [1,2,3];
-    assert_eq!(array.popcnt(0..), 1+1+2);
-    assert_eq!(array.ctz(0..), 3*8-1-1-2);
-    assert_eq!(array.popcnt(3..=10), 1);
-    assert_eq!(array.ctz(3..=10), 7);
+    assert_eq!(array.bit_iter().popcnt(), 1+1+2);
+    assert_eq!(array.bit_iter().ctz(), 3*8-1-1-2);
+    assert_eq!(array.biter(3..=10).popcnt(), 1);
+    assert_eq!(array.biter(3..=10).ctz(), 7);
 ```
 
 first or last set or unset bit 
 ```rust 
     use slice_bit_operations::SliceBitOps;
     let array: [u8;3] = [1,2,3];
-    assert_eq!(array.first_one(0..), Some(0));
-    assert_eq!(array.first_zero(0..), Some(1));
-    assert_eq!(array.last_one(0..), Some(2*8+1));
-    assert_eq!(array.last_zero(0..), Some(3*8-1));
+    assert_eq!(array.bit_iter().first_one(), Some(0));
+    assert_eq!(array.bit_iter().first_zero(), Some(1));
+    assert_eq!(array.bit_iter().last_one(), Some(2*8+1));
+    assert_eq!(array.bit_iter().last_zero(), Some(3*8-1));
 ```
 
 for full docs use docs.rs : [docs](https://docs.rs/slice_bit_operations/latest/)

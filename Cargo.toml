@@ -12,4 +12,4 @@ autobenches = false
 
 [dependencies]
 bit_operations = "0.3.1"
-biter = "0.1.5"
+biter = "0.2.1"

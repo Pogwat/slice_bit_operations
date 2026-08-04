@@ -1,63 +1,98 @@
 use slice_bit_operations::{SliceBitOps,MutSliceBitOps};
 use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
 
 fn last_zero(c: &mut Criterion) {
     let fend: Vec<u64> = (0..1000).rev().chain(core::iter::repeat(!0).take(9000)).collect();
     c.bench_function("last_zero", |b|
-        b.iter(|| fend.last_zero(0..) )
+        b.iter(|| fend.bit_iter().last_zero() )
     );
 }
 fn first_one(c: &mut Criterion) {
     let zstar: Vec<u64> = core::iter::repeat(0).take(9000).chain((0..1000).rev()).collect();
     c.bench_function("first_one", |b|
-        b.iter(|| zstar.first_one(0..) )
+        b.iter(|| zstar.bit_iter().first_one() )
     );
 }
 fn first_zero(c: &mut Criterion) {
     let fstar: Vec<u64> = core::iter::repeat(!0).take(9000).chain((0..1000).rev()).collect();
     c.bench_function("first_zero", |b|
-        b.iter(|| fstar.first_zero(0..) )
+        b.iter(|| fstar.bit_iter().first_zero() )
     );
 }
 fn last_one(c: &mut Criterion) {
     let zend: Vec<u64> = (0..1000).rev().chain(core::iter::repeat(0).take(9000)).collect();
     c.bench_function("last_one", |b|
-        b.iter(|| zend.last_one(0..) )
+        b.iter(|| zend.bit_iter().last_one() )
+    );
+}
+// //2.2123 µs
+// fn ctz(c: &mut Criterion) {
+//     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+//     c.bench_function("ctz", |b|
+//         b.iter(|| bal.ctz(0..) )
+//     );
+// }
+// //2.0312 µs
+// fn popcnt(c: &mut Criterion) {
+//     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+//     c.bench_function("popcnt", |b|
+//         b.iter(|| bal.popcnt(0..) )
+//     );
+// }
+//2.2016 µs
+fn biter_popcnt(c: &mut Criterion) {
+    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    c.bench_function("biter_popcnt", |b|
+        b.iter(|| bal.bit_iter().popcnt() )
+    );
+}
+//2.4204 µs
+fn biter_ctz(c: &mut Criterion) {
+    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    c.bench_function("biter_ctz", |b|
+        b.iter(|| bal.bit_iter().ctz() )
     );
 }
 
-fn ctz(c: &mut Criterion) {
-    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
-    c.bench_function("ctz", |b|
-        b.iter(|| bal.ctz(0..) )
+fn biter_first_zero(c: &mut Criterion) {
+    let fstar: Vec<u64> = core::iter::repeat(!0).take(9000).chain((0..1000).rev()).collect();
+    c.bench_function("biter_first_zero", |b|
+        b.iter(|| fstar.bit_iter().first_zero() )
+    );
+}
+fn biter_first_one(c: &mut Criterion) {
+    let zstar: Vec<u64> = core::iter::repeat(0).take(9000).chain((0..1000).rev()).collect();
+    c.bench_function("biter_first_one", |b|
+        b.iter(|| zstar.bit_iter().first_one() )
     );
 }
 
-fn popcnt(c: &mut Criterion) {
-    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
-    c.bench_function("popcnt", |b|
-        b.iter(|| bal.popcnt(0..) )
-    );
-}
 
 fn bit_iter(c: &mut Criterion) {
     let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
     c.bench_function("bit_iter", |b|
         b.iter(|| {
             let mut set_bits=0;
-            bal.bit_iter().for_each(|bit| {set_bits +=bit as usize;})
+            bal.bit_iter().for_each(|bit| {set_bits +=bit as usize;});
+            black_box(set_bits);
         })
     );
 }
 
 fn bit_iter_mut(c: &mut Criterion) {
-    let bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
+    let mut bal: Vec<u64> = core::iter::repeat(0).take(5000).chain(core::iter::repeat(!0).take(5000)).collect();
     c.bench_function("bit_iter_mut", |b|
-        b.iter(|| bal.clone().bit_iter_mut().for_each(|mut bit| *bit=false) )
+        b.iter(|| {
+            bal.bit_iter_mut().for_each(|mut bit| *bit=false);
+            black_box(&bal);
+        })
     );
 }
 
 criterion_group!(firstlast, last_one,last_zero,first_one,first_zero);
-criterion_group!(counters, ctz,popcnt);
+criterion_group!(biterfirst, biter_first_one,biter_first_zero);
+//criterion_group!(counters, ctz,popcnt);
+criterion_group!(bitercounters, biter_ctz,biter_popcnt);
 criterion_group!(biters, bit_iter,bit_iter_mut);
-criterion_main!(firstlast,counters,biters);
+criterion_main!(firstlast,biters,bitercounters,biterfirst);
